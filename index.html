@@ -11,10 +11,13 @@
   <header class="header">
     <div class="header-inner">
       <div class="brand">
-        <span class="brand-icon">🗺️</span>
-        <div>
-          <h1>JAC Booking System</h1>
-          <p>Procesador de Reservas · GetYourGuide &amp; Viator</p>
+        <div class="logo-box">
+          <span class="logo-jac">JAC</span>
+          <span class="logo-sub">TOUR AND TRANSFERS</span>
+        </div>
+        <div class="brand-text">
+          <h1>Booking System</h1>
+          <p>GetYourGuide &amp; Viator · Procesador de Reservas</p>
         </div>
       </div>
       <div class="header-badges">
@@ -33,7 +36,6 @@
           <h2>Información de Reserva</h2>
           <div id="platform-indicator"></div>
         </div>
-
         <textarea
           id="booking-input"
           class="booking-textarea"
@@ -41,7 +43,6 @@
           oninput="detectPlatform(this.value)"
           spellcheck="false"
         ></textarea>
-
         <div class="btn-group">
           <button class="btn btn-primary" onclick="parseBooking()">✦ Generar</button>
           <button class="btn btn-secondary" onclick="clearAll()">Limpiar</button>
@@ -51,27 +52,36 @@
       <!-- ── Output Panel ── -->
       <section class="panel output-panel">
 
-        <!-- Empty state -->
         <div id="ticket-placeholder" class="placeholder">
           <div class="placeholder-icon">🎫</div>
           <p>Los resultados aparecerán aquí</p>
           <small>Pega el texto de la reserva y presiona "Generar"</small>
         </div>
 
-        <!-- Results (hidden until parsed) -->
         <div id="output-container" class="hidden">
+
+          <!-- Hotel match banner -->
+          <div id="hotel-banner" class="hotel-banner hidden no-print"></div>
 
           <!-- Supplementary fields -->
           <div class="supp-fields no-print">
             <div class="supp-label">Detalles adicionales para los mensajes</div>
             <div class="supp-grid">
+
+              <div class="supp-field full-width">
+                <label for="sf-hotel">🏨 Hotel</label>
+                <select id="sf-hotel" onchange="onHotelChange(this.value)">
+                  <option value="">-- Sin hotel / pickup propio --</option>
+                </select>
+              </div>
+
               <div class="supp-field">
                 <label for="sf-tour">🏷 Nombre corto del tour</label>
                 <input id="sf-tour" type="text" placeholder="ej. ISLA SAONA" oninput="refreshMessages()">
               </div>
               <div class="supp-field">
                 <label for="sf-meeting">📍 Meeting Point</label>
-                <input id="sf-meeting" type="text" placeholder="ej. PUERTA SEGURIDAD MELIA" oninput="refreshMessages()">
+                <input id="sf-meeting" type="text" placeholder="ej. LOBBY" oninput="refreshMessages()">
               </div>
               <div class="supp-field">
                 <label for="sf-area">📍 Área / Zona</label>
@@ -81,14 +91,15 @@
                 <label for="sf-phone">📞 Teléfono del cliente</label>
                 <input id="sf-phone" type="text" placeholder="+1 809 XXX XXXX" oninput="refreshMessages()">
               </div>
+
             </div>
           </div>
 
           <!-- Tabs -->
           <div class="tabs no-print">
-            <button class="tab active"  onclick="switchTab('ticket', this)">🎫 Ticket</button>
-            <button class="tab"         onclick="switchTab('driver', this)">🚐 Chofer</button>
-            <button class="tab"         onclick="switchTab('client', this)">💬 Cliente</button>
+            <button class="tab active" onclick="switchTab('ticket', this)">🎫 Ticket</button>
+            <button class="tab"        onclick="switchTab('driver', this)">🚐 Chofer</button>
+            <button class="tab"        onclick="switchTab('client', this)">💬 Cliente</button>
           </div>
 
           <!-- Tab: Ticket -->
@@ -101,7 +112,7 @@
             </div>
           </div>
 
-          <!-- Tab: Driver message (Spanish) -->
+          <!-- Tab: Driver message -->
           <div id="tab-driver" class="tab-content hidden">
             <div class="msg-header">
               <span class="msg-title">Mensaje para el Chofer</span>
@@ -114,7 +125,7 @@
             </div>
           </div>
 
-          <!-- Tab: Client message (English) -->
+          <!-- Tab: Client message -->
           <div id="tab-client" class="tab-content hidden">
             <div class="msg-header">
               <span class="msg-title">Mensaje para el Cliente</span>
