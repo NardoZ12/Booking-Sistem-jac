@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JAC Booking System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">🗺️</span>
+        <div>
+          <h1>JAC Booking System</h1>
+          <p>Procesador de Reservas · GetYourGuide &amp; Viator</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="hbadge gyg">GYG</span>
+        <span class="hbadge viator">Viator</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="layout">
+
+      <!-- ── Input Panel ── -->
+      <section class="panel input-panel">
+        <div class="panel-header">
+          <h2>Información de Reserva</h2>
+          <div id="platform-indicator"></div>
+        </div>
+
+        <textarea
+          id="booking-input"
+          class="booking-textarea"
+          placeholder="Pega aquí el texto completo de la reserva (GetYourGuide o Viator)..."
+          oninput="detectPlatform(this.value)"
+          spellcheck="false"
+        ></textarea>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="parseBooking()">✦ Generar Ticket</button>
+          <button class="btn btn-secondary" onclick="clearAll()">Limpiar</button>
+        </div>
+      </section>
+
+      <!-- ── Ticket Panel ── -->
+      <section class="panel ticket-panel">
+        <div id="ticket-placeholder" class="placeholder">
+          <div class="placeholder-icon">🎫</div>
+          <p>El ticket de confirmación aparecerá aquí</p>
+          <small>Pega el texto de la reserva y presiona "Generar Ticket"</small>
+        </div>
+
+        <div id="ticket-container" class="hidden">
+          <div id="ticket"></div>
+          <div class="ticket-actions no-print">
+            <button class="btn btn-print" onclick="printTicket()">🖨️ Imprimir</button>
+            <button class="btn btn-copy" onclick="copyTicketText()">📋 Copiar</button>
+            <button class="btn btn-new" onclick="clearAll()">+ Nueva Reserva</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
