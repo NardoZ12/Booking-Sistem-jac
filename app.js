@@ -59,8 +59,8 @@ const HOTEL_SCHEDULE = [
 
 // ── Hotel select (populated on load) ─────────
 
-function initHotelSelect() {
-  const sel = document.getElementById('sf-hotel');
+function populateHotelSelect(selectId) {
+  const sel = document.getElementById(selectId);
   if (!sel) return;
 
   const zones = {};
@@ -82,7 +82,12 @@ function initHotelSelect() {
   });
 }
 
-window.addEventListener('load', initHotelSelect);
+function initHotelSelects() {
+  populateHotelSelect('sf-hotel');
+  populateHotelSelect('mf-hotel');
+}
+
+window.addEventListener('load', initHotelSelects);
 
 // ── Hotel matching ────────────────────────────
 
@@ -453,11 +458,6 @@ function renderTicket(data) {
         </div>
       </div>
 
-      <div class="ticket-code-section">
-        <span class="ticket-code-label">Código de Reserva</span>
-        <span class="ticket-code">${escHtml(data.bookingCode || '—')}</span>
-      </div>
-
       <div class="ticket-body">
         <div class="ticket-grid">
           ${field('👤 Viajero Principal', data.leadTraveler)}
@@ -487,6 +487,31 @@ function switchTab(name, btn) {
   document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + name).classList.remove('hidden');
   btn.classList.add('active');
+}
+
+// ── Input mode (paste vs. manual) ─────────────
+
+function switchInputMode(name, btn) {
+  document.querySelectorAll('.input-mode').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.mode-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('mode-' + name).classList.remove('hidden');
+  btn.classList.add('active');
+}
+
+function onManualHotelChange(idxStr) {
+  const idx = parseInt(idxStr);
+  if (isNaN(idx) || idx < 0) return;
+  const hotel = HOTEL_SCHEDULE[idx];
+  if (!hotel) return;
+  document.getElementById('mf-location').value = hotel.meetingPoint;
+  document.getElementById('mf-time').value     = hotel.time;
+}
+
+function clearManualForm() {
+  ['mf-traveler','mf-people','mf-tour','mf-date','mf-hotel',
+   'mf-location','mf-time','mf-amount','mf-phone'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
 }
 
 // ── Main action ───────────────────────────────
@@ -531,6 +556,55 @@ function parseBooking() {
   document.querySelector('.tab').classList.add('active');
 }
 
+function generateManualBooking() {
+  const traveler = document.getElementById('mf-traveler').value.trim();
+  const peopleN  = parseInt(document.getElementById('mf-people').value) || 0;
+  const tour     = document.getElementById('mf-tour').value.trim();
+  const date     = document.getElementById('mf-date').value.trim();
+  const hotelIdx = document.getElementById('mf-hotel').value;
+  const location = document.getElementById('mf-location').value.trim();
+  const time     = document.getElementById('mf-time').value.trim();
+  const amount   = document.getElementById('mf-amount').value.trim();
+  const phone    = document.getElementById('mf-phone').value.trim();
+
+  if (!traveler) { showToast('⚠ Ingresa el nombre del viajero principal.'); return; }
+
+  const idx = parseInt(hotelIdx);
+  const hotel = (!isNaN(idx) && idx >= 0) ? { ...HOTEL_SCHEDULE[idx], idx } : null;
+
+  const data = {
+    platform: 'Manual', platformColor: 'manual',
+    bookingCode: '', product: tour, tourDate: date,
+    leadTraveler: traveler, phone,
+    numTravelers: peopleN > 0 ? `${peopleN} ${peopleN === 1 ? 'persona' : 'personas'}` : '',
+    location, hotelPickup: hotel ? hotel.name : '',
+    pickupTime: time, amount, providerCode: ''
+  };
+
+  _bookingData = data;
+  _hotelMatch  = hotel;
+
+  // Sync supplementary fields with manual data
+  document.getElementById('sf-phone').value   = phone;
+  document.getElementById('sf-tour').value    = tour;
+  document.getElementById('sf-meeting').value = hotel ? hotel.meetingPoint : location;
+  document.getElementById('sf-area').value    = hotel ? hotel.zone : '';
+  document.getElementById('sf-hotel').value   = hotel ? hotel.idx : '';
+
+  hideHotelBanner();
+  if (hotel) showHotelBanner(hotel);
+
+  renderTicket(data);
+  refreshMessages();
+
+  document.getElementById('ticket-placeholder').classList.add('hidden');
+  document.getElementById('output-container').classList.remove('hidden');
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-ticket').classList.remove('hidden');
+  document.querySelector('.tab').classList.add('active');
+}
+
 function clearAll() {
   _bookingData = null; _hotelMatch = null;
   document.getElementById('booking-input').value = '';
@@ -543,6 +617,11 @@ function clearAll() {
   ['sf-tour','sf-meeting','sf-area','sf-phone','sf-hotel'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  clearManualForm();
+  document.querySelectorAll('.input-mode').forEach(el => el.classList.add('hidden'));
+  document.getElementById('mode-paste').classList.remove('hidden');
+  document.querySelectorAll('.mode-tab').forEach(el => el.classList.remove('active'));
+  document.querySelector('.mode-tab').classList.add('active');
   hideHotelBanner();
 }
 

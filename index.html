@@ -36,16 +36,73 @@
           <h2>Información de Reserva</h2>
           <div id="platform-indicator"></div>
         </div>
-        <textarea
-          id="booking-input"
-          class="booking-textarea"
-          placeholder="Pega aquí el texto completo de la reserva (GetYourGuide o Viator)..."
-          oninput="detectPlatform(this.value)"
-          spellcheck="false"
-        ></textarea>
-        <div class="btn-group">
-          <button class="btn btn-primary" onclick="parseBooking()">✦ Generar</button>
-          <button class="btn btn-secondary" onclick="clearAll()">Limpiar</button>
+
+        <div class="mode-tabs">
+          <button class="mode-tab active" onclick="switchInputMode('paste', this)">📋 Pegar Texto</button>
+          <button class="mode-tab"        onclick="switchInputMode('manual', this)">✍️ Crear Manual</button>
+        </div>
+
+        <!-- Mode: paste raw confirmation text -->
+        <div id="mode-paste" class="input-mode">
+          <textarea
+            id="booking-input"
+            class="booking-textarea"
+            placeholder="Pega aquí el texto completo de la reserva (GetYourGuide o Viator)..."
+            oninput="detectPlatform(this.value)"
+            spellcheck="false"
+          ></textarea>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="parseBooking()">✦ Generar</button>
+            <button class="btn btn-secondary" onclick="clearAll()">Limpiar</button>
+          </div>
+        </div>
+
+        <!-- Mode: manual entry -->
+        <div id="mode-manual" class="input-mode hidden">
+          <div class="manual-grid">
+            <div class="manual-field full-width">
+              <label for="mf-traveler">👤 Viajero principal</label>
+              <input id="mf-traveler" type="text" placeholder="ej. John Smith">
+            </div>
+            <div class="manual-field">
+              <label for="mf-people">👥 Cantidad de personas</label>
+              <input id="mf-people" type="number" min="1" placeholder="ej. 4">
+            </div>
+            <div class="manual-field">
+              <label for="mf-tour">🏷 Nombre del tour</label>
+              <input id="mf-tour" type="text" placeholder="ej. ISLA SAONA">
+            </div>
+            <div class="manual-field">
+              <label for="mf-date">📅 Fecha del tour</label>
+              <input id="mf-date" type="text" placeholder="ej. sáb, 10 dic 2026">
+            </div>
+            <div class="manual-field full-width">
+              <label for="mf-hotel">🏨 Hotel</label>
+              <select id="mf-hotel" onchange="onManualHotelChange(this.value)">
+                <option value="">-- Sin hotel / pickup propio --</option>
+              </select>
+            </div>
+            <div class="manual-field">
+              <label for="mf-location">📍 Lugar de recogida</label>
+              <input id="mf-location" type="text" placeholder="ej. Lobby del hotel">
+            </div>
+            <div class="manual-field">
+              <label for="mf-time">🕐 Hora de recogida</label>
+              <input id="mf-time" type="text" placeholder="ej. 7:10 AM">
+            </div>
+            <div class="manual-field">
+              <label for="mf-amount">💰 Monto pagado</label>
+              <input id="mf-amount" type="text" placeholder="ej. $120.00 USD">
+            </div>
+            <div class="manual-field">
+              <label for="mf-phone">📞 Teléfono</label>
+              <input id="mf-phone" type="text" placeholder="+1 809 XXX XXXX">
+            </div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="generateManualBooking()">✦ Generar</button>
+            <button class="btn btn-secondary" onclick="clearAll()">Limpiar</button>
+          </div>
         </div>
       </section>
 

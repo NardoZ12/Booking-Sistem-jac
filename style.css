@@ -278,6 +278,63 @@ body {
 .supp-field input::placeholder { color: #b0b8c4; }
 .supp-field select { cursor: pointer; }
 
+/* ── Input mode tabs (Pegar texto / Crear manual) ── */
+.mode-tabs {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.9rem 1.5rem 0;
+}
+.mode-tab {
+  flex: 1;
+  padding: 0.55rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
+  background: #f7f9fc;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.mode-tab:hover { color: var(--text); }
+.mode-tab.active { color: var(--jac-red); background: #fff; border-color: var(--border); }
+
+.input-mode { padding-top: 0; }
+
+/* ── Manual booking entry form ── */
+.manual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  padding: 1.1rem 1.5rem 0.4rem;
+}
+.manual-field.full-width { grid-column: 1 / -1; }
+.manual-field label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+.manual-field input,
+.manual-field select {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: var(--text);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.manual-field input:focus,
+.manual-field select:focus { border-color: var(--jac-red); }
+.manual-field input::placeholder { color: #b0b8c4; }
+.manual-field select { cursor: pointer; }
+
 /* ── Tabs ── */
 .tabs {
   display: flex;
@@ -320,32 +377,10 @@ body {
 }
 .ticket-card.gyg    .ticket-header { background: linear-gradient(135deg, var(--gyg), var(--gyg-dk)); }
 .ticket-card.viator .ticket-header { background: linear-gradient(135deg, var(--viator), var(--viator-dk)); }
+.ticket-card.manual .ticket-header { background: linear-gradient(135deg, var(--jac-black) 0%, var(--jac-black2) 100%); }
 
 .ticket-brand-text { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.08em; display: block; }
 .ticket-brand-sub  { font-size: 0.68rem; opacity: 0.8; display: block; margin-top: 0.15rem; }
-
-.ticket-code-section {
-  padding: 0.9rem 1.5rem;
-  background: #f7f9fc;
-  border-bottom: 2px dashed var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.ticket-code-label {
-  font-size: 0.62rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-}
-.ticket-code {
-  font-family: 'Consolas', 'Courier New', monospace;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--text);
-}
 
 .ticket-body { padding: 1.1rem 1.5rem 0.85rem; }
 
