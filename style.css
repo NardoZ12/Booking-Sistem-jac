@@ -324,16 +324,6 @@ body {
 .ticket-brand-text { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.08em; display: block; }
 .ticket-brand-sub  { font-size: 0.68rem; opacity: 0.8; display: block; margin-top: 0.15rem; }
 
-.ticket-platform-badge {
-  padding: 0.3rem 0.85rem;
-  background: rgba(255,255,255,.22);
-  border-radius: 20px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  border: 1px solid rgba(255,255,255,.35);
-}
-
 .ticket-code-section {
   padding: 0.9rem 1.5rem;
   background: #f7f9fc;

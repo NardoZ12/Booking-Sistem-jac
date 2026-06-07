@@ -451,7 +451,6 @@ function renderTicket(data) {
           <span class="ticket-brand-text">JAC TOURS</span>
           <span class="ticket-brand-sub">Ticket de Confirmación</span>
         </div>
-        <div class="ticket-platform-badge">${data.platform}</div>
       </div>
 
       <div class="ticket-code-section">
@@ -471,7 +470,6 @@ function renderTicket(data) {
         ${hotelBlock}
         <div class="ticket-divider"></div>
         ${field('💰 Monto Pagado', data.amount, true)}
-        ${field('🔖 Conf. Proveedor', data.providerCode)}
         ${data.product ? `<div class="ticket-product">🎟 ${escHtml(data.product)}</div>` : ''}
       </div>
 
