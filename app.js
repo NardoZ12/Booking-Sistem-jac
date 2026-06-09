@@ -174,44 +174,74 @@ function hideHotelBanner() {
   document.getElementById('hotel-banner').classList.add('hidden');
 }
 
+// ── Text normalisation ────────────────────────
+// Different browsers/OS copy-paste with different whitespace chars.
+// Normalise before any detection or parsing.
+
+function normalizeText(text) {
+  return text
+    .replace(/\r\n/g, '\n')   // Windows line endings
+    .replace(/\r/g, '\n')     // old Mac line endings
+    .replace(/ /g, ' ')  // non-breaking space (common in GYG copy)
+    .replace(/ /g, ' ')  // thin space
+    .replace(/ /g, ' ')  // narrow no-break space
+    .replace(/​/g, '');  // zero-width space
+}
+
 // ── Platform detection ────────────────────────
 
 function isGYG(text) {
-  return text.includes('Lead traveler') ||
+  return /\bGYG[A-Z0-9]{5,}/i.test(text) ||   // GYG booking code always starts with GYG
+         text.includes('Lead traveler') ||
          text.includes('Total commission rate') ||
          text.includes('Booked on') ||
-         /Pickup at\s+\d+:\d+\s*[AP]M/i.test(text);
+         /Pickup at\s+\d+:\d+\s*[AP]M/i.test(text) ||
+         /\d+\s+people\s+-\s+\$[\d.]+/.test(text);
 }
 function isViator(text) {
   return text.includes('Viajero principal:') ||
          text.includes('Importe que recibirá:') ||
-         /\bBR-\d+\b/.test(text);
+         /\bBR-\d+\b/.test(text) ||
+         text.includes('Requisitos especiales:') ||
+         text.includes('Punto de recogida:');
 }
 
 function detectPlatform(text) {
   const el = document.getElementById('platform-indicator');
   if (!text.trim()) { el.innerHTML = ''; return null; }
-  if (isGYG(text))    { el.innerHTML = '<span class="detected gyg">✓ GetYourGuide</span>'; return 'gyg'; }
-  if (isViator(text)) { el.innerHTML = '<span class="detected viator">✓ Viator</span>';    return 'viator'; }
+  const t = normalizeText(text);
+  if (isGYG(t))    { el.innerHTML = '<span class="detected gyg">✓ GetYourGuide</span>'; return 'gyg'; }
+  if (isViator(t)) { el.innerHTML = '<span class="detected viator">✓ Viator</span>';    return 'viator'; }
   el.innerHTML = '<span class="detected unknown">⚠ No reconocido</span>';
   return null;
 }
 
 // ── Parsers ───────────────────────────────────
 
-function parseGYG(text) {
+function parseGYG(raw) {
+  const text  = normalizeText(raw);
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
   let bookingCode = '';
   const prodIdx  = lines.findIndex(l => l === 'Product thumbnail');
-  const headArea = prodIdx > 0 ? lines.slice(0, prodIdx) : lines.slice(0, 4);
+  const headArea = prodIdx > 0 ? lines.slice(0, prodIdx) : lines.slice(0, 8);
   for (const l of headArea) {
     if (/^[A-Z0-9]{8,16}$/.test(l)) { bookingCode = l; break; }
   }
-  if (!bookingCode) { const m = text.match(/\b([A-Z0-9]{10,14})\b/); if (m) bookingCode = m[1]; }
+  if (!bookingCode) {
+    const codeM = text.match(/(?:Booking:\s*)?([A-Z0-9]{8,16})/);
+    if (codeM) bookingCode = codeM[1];
+  }
 
+  // Format 2: has "Product thumbnail" line; Format 1: product is first non-option line
   let product = '';
-  if (prodIdx !== -1 && lines[prodIdx + 1]) product = lines[prodIdx + 1];
+  if (prodIdx !== -1 && lines[prodIdx + 1]) {
+    product = lines[prodIdx + 1];
+  } else {
+    const optIdx = lines.findIndex(l => l.startsWith('Option:'));
+    if (optIdx > 0) product = lines[optIdx - 1];
+    else if (lines[0] && !/^Booking:/i.test(lines[0])) product = lines[0];
+  }
 
   let tourDate = '';
   const dateM = text.match(/(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+\w+\s+\d+\w*,?\s+\d{4}/i);
@@ -226,8 +256,16 @@ function parseGYG(text) {
   if (phoneM) phone = phoneM[0].trim();
 
   let numTravelers = '';
-  const totalM = text.match(/Total:\s*(\d+)\s*person/i);
-  if (totalM) { const n = parseInt(totalM[1]); numTravelers = `${n} ${n === 1 ? 'persona' : 'personas'}`; }
+  // "Total: 2 people" or "Total: 2 persons" or "Total: 1 person"
+  const totalM = text.match(/Total:\s*(\d+)\s*p(?:erson|eople)/i);
+  if (totalM) {
+    const n = parseInt(totalM[1]);
+    numTravelers = `${n} ${n === 1 ? 'persona' : 'personas'}`;
+  } else {
+    // Fallback: "2 Adults" or "2x Adult"
+    const adultM = text.match(/(\d+)(?:x)?\s*Adults?/i);
+    if (adultM) { const n = parseInt(adultM[1]); numTravelers = `${n} ${n === 1 ? 'persona' : 'personas'}`; }
+  }
 
   let location = '';
   const locIdx = lines.findIndex(l => l === 'Location');
@@ -253,7 +291,8 @@ function parseGYG(text) {
            hotelPickup: '', providerCode: '' };
 }
 
-function parseViator(text) {
+function parseViator(raw) {
+  const text  = normalizeText(raw);
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
   let bookingCode = '';
@@ -517,8 +556,9 @@ function clearManualForm() {
 // ── Main action ───────────────────────────────
 
 function parseBooking() {
-  const text = document.getElementById('booking-input').value;
-  if (!text.trim()) { showToast('⚠ Pega el texto de la reserva primero.'); return; }
+  const raw  = document.getElementById('booking-input').value;
+  if (!raw.trim()) { showToast('⚠ Pega el texto de la reserva primero.'); return; }
+  const text = normalizeText(raw);
 
   let data;
   if      (isGYG(text))    data = parseGYG(text);
