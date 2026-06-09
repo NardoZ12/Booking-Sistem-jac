@@ -197,6 +197,8 @@ body {
 .btn-print:hover { opacity: 0.85; }
 .btn-copy { background: var(--border); color: var(--text); }
 .btn-copy:hover { background: #cbd5e0; }
+.btn-download { background: #fff; color: var(--jac-red); border: 1px solid var(--jac-red); }
+.btn-download:hover { background: var(--jac-red); color: #fff; }
 .btn-new {
   background: transparent;
   color: var(--muted);
@@ -361,6 +363,7 @@ body {
   padding: 0.85rem 1.5rem;
   border-top: 1px solid var(--border);
   display: flex;
+  flex-wrap: wrap;
   gap: 0.6rem;
   background: #fafbfd;
 }

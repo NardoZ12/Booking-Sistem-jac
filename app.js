@@ -693,6 +693,50 @@ function copyTicketText() {
     .catch(() => showToast('⚠ No se pudo copiar'));
 }
 
+// ── Download (PNG / PDF) ──────────────────────
+
+function ticketFileName(ext) {
+  const name = (_bookingData?.leadTraveler || 'ticket').trim().replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '');
+  return `JAC_Ticket_${name || 'reserva'}.${ext}`;
+}
+
+function captureTicketCanvas() {
+  const card = document.querySelector('#ticket .ticket-card');
+  if (!card) { showToast('⚠ No hay ticket para descargar.'); return null; }
+  return html2canvas(card, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+}
+
+function downloadTicketPNG() {
+  const capture = captureTicketCanvas();
+  if (!capture) return;
+  capture.then(canvas => {
+    const link = document.createElement('a');
+    link.download = ticketFileName('png');
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('✓ Imagen descargada');
+  }).catch(() => showToast('⚠ No se pudo generar la imagen'));
+}
+
+function downloadTicketPDF() {
+  const capture = captureTicketCanvas();
+  if (!capture) return;
+  capture.then(canvas => {
+    const { jsPDF } = window.jspdf;
+    const pxToMm   = px => px * 0.264583;
+    const widthMm  = pxToMm(canvas.width);
+    const heightMm = pxToMm(canvas.height);
+    const pdf = new jsPDF({
+      orientation: widthMm > heightMm ? 'landscape' : 'portrait',
+      unit: 'mm',
+      format: [widthMm, heightMm]
+    });
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, widthMm, heightMm);
+    pdf.save(ticketFileName('pdf'));
+    showToast('✓ PDF descargado');
+  }).catch(() => showToast('⚠ No se pudo generar el PDF'));
+}
+
 function copyMsg(id) {
   navigator.clipboard.writeText(document.getElementById(id)?.value || '')
     .then(() => showToast('✓ Mensaje copiado'))
