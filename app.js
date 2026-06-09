@@ -10,51 +10,56 @@ let _hotelMatch  = null;
 // Source: Horario_JAC.pdf
 
 const HOTEL_SCHEDULE = [
-  // ── UVERO ALTO ───────────────────────────
-  { name: 'EXCELENCE PUNTA CANA',          time: '6:40 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  { name: 'SIRENIS',                        time: '6:50 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  { name: 'EXCELENCE DEL CARMEN Y FINEST',  time: '7:00 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  { name: 'BREATHLESS',                     time: '7:00 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  { name: 'NOW ONIX',                       time: '7:05 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  { name: 'DREAMS ONIX',                    time: '7:05 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  { name: 'LIVE AQUA',                      time: '7:10 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  { name: 'OCEAN EL FARO',                  time: '7:10 AM', meetingPoint: 'BARRERA',    zone: 'UVERO ALTO'   },
-  { name: 'HARD ROCK',                      time: '7:00 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  { name: 'BAHIA PRINCIPE PUNTA CANA',      time: '7:10 AM', meetingPoint: 'LOBBY PUJ', zone: 'UVERO ALTO'   },
-  { name: 'RIU REPUBLICA',                  time: '7:10 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  { name: 'OCCIDENTAL CARIBE',              time: '7:20 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  { name: 'ROYALTON SPLASH',                time: '7:25 AM', meetingPoint: 'BARRERA',    zone: 'UVERO ALTO'   },
-  { name: 'LOS MAJESTIC',                   time: '7:20 AM', meetingPoint: 'LOBBY',      zone: 'UVERO ALTO'   },
-  // ── COMPLEJO RIU ─────────────────────────
-  { name: 'RIU PUNTA CANA',                 time: '7:10 AM', meetingPoint: 'LOBBY',      zone: 'COMPLEJO RIU' },
-  { name: 'RIU BAMBU',                      time: '7:15 AM', meetingPoint: 'LOBBY',      zone: 'COMPLEJO RIU' },
-  { name: 'RIU MACAO',                      time: '7:20 AM', meetingPoint: 'LOBBY',      zone: 'COMPLEJO RIU' },
-  { name: 'RIU PALACE BAVARO',              time: '7:25 AM', meetingPoint: 'LOBBY',      zone: 'COMPLEJO RIU' },
-  // ── IBEROSTAR ────────────────────────────
-  { name: 'IBEROSTAR SELECTION',            time: '7:30 AM', meetingPoint: 'LOBBY',      zone: 'IBEROSTAR'    },
-  // ── WHITE SANDS ──────────────────────────
-  { name: 'PUNTA CANA PRINCESS',            time: '7:00 AM', meetingPoint: 'LOBBY',      zone: 'WHITE SANDS'  },
-  { name: 'VIK ARENA',                      time: '7:10 AM', meetingPoint: 'LOBBY',      zone: 'WHITE SANDS'  },
-  { name: 'OCEAN BLUE',                     time: '7:05 AM', meetingPoint: 'LOBBY',      zone: 'WHITE SANDS'  },
-  { name: 'KARIBO',                         time: '7:15 AM', meetingPoint: 'LOBBY',      zone: 'WHITE SANDS'  },
-  { name: 'CARIBE DELUXE PRINCESS',         time: '7:20 AM', meetingPoint: 'LOBBY',      zone: 'WHITE SANDS'  },
-  { name: 'BAVARO PRINCESS',                time: '7:30 AM', meetingPoint: 'LOBBY',      zone: 'WHITE SANDS'  },
-  { name: 'OCC PUNTA CANA',                 time: '7:40 AM', meetingPoint: 'LOBBY',      zone: 'WHITE SANDS'  },
-  // ── LOS CORALES ──────────────────────────
-  { name: 'PALLADIUM PUNTA CANA',           time: '7:00 AM', meetingPoint: 'CASINO',     zone: 'LOS CORALES'  },
-  { name: 'PALLADIUM BAVARO',               time: '7:05 AM', meetingPoint: 'MEETING P.', zone: 'LOS CORALES'  },
-  { name: 'PRESIDENTIAL SUITES',            time: '7:10 AM', meetingPoint: 'BARRERA',    zone: 'LOS CORALES'  },
-  { name: 'VISTA SOL',                      time: '7:10 AM', meetingPoint: 'BARRERA',    zone: 'LOS CORALES'  },
-  { name: 'IMPRESSIVE',                     time: '7:20 AM', meetingPoint: 'BARRERA',    zone: 'LOS CORALES'  },
-  { name: 'PLAZA TURQUESA',                 time: '7:30 AM', meetingPoint: 'BARRERA',    zone: 'LOS CORALES'  },
-  { name: 'WHALA BAVARO',                   time: '7:30 AM', meetingPoint: 'LOBBY',      zone: 'LOS CORALES'  },
-  { name: 'SECRETS ROYAL',                  time: '7:35 AM', meetingPoint: 'LOBBY',      zone: 'LOS CORALES'  },
-  { name: 'DREAMS ROYAL',                   time: '7:35 AM', meetingPoint: 'LOBBY',      zone: 'LOS CORALES'  },
-  { name: 'LOPESAN',                        time: '7:40 AM', meetingPoint: 'LOBBY',      zone: 'LOS CORALES'  },
-  { name: 'COMPLEJO MELIA',                 time: '7:40 AM', meetingPoint: 'BARRERA',    zone: 'LOS CORALES'  },
-  { name: 'BARCELO BAVARO PALACE',          time: '7:40 AM', meetingPoint: 'LOBBY',      zone: 'LOS CORALES'  },
-  { name: 'AC MARRIOTT',                    time: '7:40 AM', meetingPoint: 'LOBBY',      zone: 'LOS CORALES'  },
-  { name: 'PETROMOVIL',                     time: '7:50 AM', meetingPoint: 'CAFETERIA',  zone: 'LOS CORALES'  },
+  // ── UVERO ALTO ────────────────────────────────────────────────────────
+  { name: 'EXCELLENCE PUNTA CANA',          time: '6:40 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'SIRENIS',                        time: '6:50 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'BAHIA PRINCIPE BAVARO',          time: '6:50 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'EXCELENCE DEL CARMEN Y FINEST',  time: '7:00 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'BREATHLESS',                     time: '7:00 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'HARD ROCK',                      time: '7:00 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'RIU REPUBLICA',                  time: '7:00 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'NOW ONIX',                       time: '7:05 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'DREAMS ONIX',                    time: '7:05 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'LIVE AQUA',                      time: '7:10 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'OCEAN EL FARO',                  time: '7:10 AM', meetingPoint: 'BARRERA',       zone: 'UVERO ALTO'    },
+  { name: 'OCCIDENTAL CARIBE',              time: '7:10 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  { name: 'ROYALTON SPLASH PUNTA CANA',     time: '7:10 AM', meetingPoint: 'BARRERA',       zone: 'UVERO ALTO'    },
+  { name: 'LOS MAJESTIC',                   time: '7:20 AM', meetingPoint: 'LOBBY',         zone: 'UVERO ALTO'    },
+  // ── COMPLEJO RIU ──────────────────────────────────────────────────────
+  { name: 'RIU PUNTA CANA',                 time: '7:00 AM', meetingPoint: 'LOBBY',         zone: 'COMPLEJO RIU'  },
+  { name: 'RIU BAMBU',                      time: '7:05 AM', meetingPoint: 'LOBBY',         zone: 'COMPLEJO RIU'  },
+  { name: 'RIU MACAO',                      time: '7:10 AM', meetingPoint: 'LOBBY',         zone: 'COMPLEJO RIU'  },
+  { name: 'RIU NAIBOA',                     time: '7:15 AM', meetingPoint: 'LOBBY',         zone: 'COMPLEJO RIU'  },
+  { name: 'RIU PALACE BAVARO',              time: '7:20 AM', meetingPoint: 'LOBBY',         zone: 'COMPLEJO RIU'  },
+  // ── IBEROSTAR ─────────────────────────────────────────────────────────
+  { name: 'IBEROSTAR SELECTION',            time: '7:30 AM', meetingPoint: 'LOBBY',         zone: 'IBEROSTAR'     },
+  // ── WHITE SANDS ───────────────────────────────────────────────────────
+  { name: 'PUNTA CANA PRINCESS',            time: '6:50 AM', meetingPoint: 'LOBBY',         zone: 'WHITE SANDS'   },
+  { name: 'VIK ARENA',                      time: '6:55 AM', meetingPoint: 'LOBBY',         zone: 'WHITE SANDS'   },
+  { name: 'OCEAN BLUE',                     time: '7:05 AM', meetingPoint: 'LOBBY',         zone: 'WHITE SANDS'   },
+  { name: 'CARIBE DELUXE PRINCESS',         time: '7:10 AM', meetingPoint: 'LOBBY',         zone: 'WHITE SANDS'   },
+  { name: 'BAVARO PRINCESS',                time: '7:20 AM', meetingPoint: 'LOBBY',         zone: 'WHITE SANDS'   },
+  { name: 'OCCIDENTAL PUNTA CANA',          time: '7:30 AM', meetingPoint: 'LOBBY',         zone: 'WHITE SANDS'   },
+  // ── LOS CORALES ───────────────────────────────────────────────────────
+  { name: 'PALLADIUM PUNTA CANA',           time: '7:00 AM', meetingPoint: 'CASINO',        zone: 'LOS CORALES'   },
+  { name: 'PALLADIUM BAVARO',               time: '7:00 AM', meetingPoint: 'MEETING POINT', zone: 'LOS CORALES'   },
+  { name: 'PRESIDENTIAL SUITES',            time: '7:05 AM', meetingPoint: 'BARRERA',       zone: 'LOS CORALES'   },
+  { name: 'VISTA SOL',                      time: '7:10 AM', meetingPoint: 'BARRERA',       zone: 'LOS CORALES'   },
+  { name: 'IMPRESSIVE',                     time: '7:20 AM', meetingPoint: 'BARRERA',       zone: 'LOS CORALES'   },
+  { name: 'PLAZA TURQUESA',                 time: '7:30 AM', meetingPoint: 'DALIAS',        zone: 'LOS CORALES'   },
+  { name: 'WHALA BAVARO',                   time: '7:30 AM', meetingPoint: 'LOBBY',         zone: 'LOS CORALES'   },
+  { name: 'SECRETS ROYAL BEACH',            time: '7:35 AM', meetingPoint: 'LOBBY',         zone: 'LOS CORALES'   },
+  { name: 'DREAMS ROYAL BEACH',             time: '7:35 AM', meetingPoint: 'LOBBY',         zone: 'LOS CORALES'   },
+  { name: 'LOPESAN',                        time: '7:40 AM', meetingPoint: 'LOBBY',         zone: 'LOS CORALES'   },
+  { name: 'COMPLEJO MELIA',                 time: '7:40 AM', meetingPoint: 'BARRERA',       zone: 'LOS CORALES'   },
+  { name: 'BARCELO BAVARO PALACE',          time: '7:40 AM', meetingPoint: 'LOBBY',         zone: 'LOS CORALES'   },
+  { name: 'AC MARRIOTT',                    time: '7:45 AM', meetingPoint: 'BARRERA',       zone: 'LOS CORALES'   },
+  // ── CABEZA DE TORO ────────────────────────────────────────────────────
+  { name: 'DREAM PALM BEACH',               time: '7:20 AM', meetingPoint: 'LOBBY',         zone: 'CABEZA DE TORO'},
+  { name: 'SUNSCAPE COCO',                  time: '7:30 AM', meetingPoint: 'LOBBY',         zone: 'CABEZA DE TORO'},
+  { name: 'SERENADE',                       time: '7:35 AM', meetingPoint: 'LOBBY',         zone: 'CABEZA DE TORO'},
+  { name: 'CATALONIA ROYAL',                time: '7:40 AM', meetingPoint: 'LOBBY',         zone: 'CABEZA DE TORO'},
+  { name: 'CATALONIA BAVARO',               time: '7:40 AM', meetingPoint: 'LOBBY',         zone: 'CABEZA DE TORO'},
 ];
 
 // ── Hotel select (populated on load) ─────────
@@ -150,10 +155,14 @@ function applyHotelMatch(hotel) {
   } else {
     hideHotelBanner();
   }
-  refreshMessages();
+  refreshAll();
 }
 
 function onHotelChange(idxStr) {
+  // Clear time override so the newly selected hotel's schedule takes effect
+  const sfTime = document.getElementById('sf-time');
+  if (sfTime) sfTime.value = '';
+
   const idx = parseInt(idxStr);
   const hotel = (!isNaN(idx) && idx >= 0) ? { ...HOTEL_SCHEDULE[idx], idx } : null;
   applyHotelMatch(hotel);
@@ -377,9 +386,17 @@ function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Effective pickup time: hotel schedule takes priority
+// Effective pickup time: manual sf-time override > hotel schedule > parsed time
 function effectiveTime(data) {
+  const override = (document.getElementById('sf-time')?.value || '').trim();
+  if (override) return override;
   return _hotelMatch ? _hotelMatch.time : (data.pickupTime || '—');
+}
+
+function refreshAll() {
+  if (!_bookingData) return;
+  renderTicket(_bookingData);
+  refreshMessages();
 }
 
 // ── Message generators ────────────────────────
@@ -654,7 +671,7 @@ function clearAll() {
   document.getElementById('ticket').innerHTML = '';
   document.getElementById('driver-msg').value = '';
   document.getElementById('client-msg').value = '';
-  ['sf-tour','sf-meeting','sf-area','sf-phone','sf-hotel'].forEach(id => {
+  ['sf-tour','sf-time','sf-meeting','sf-area','sf-phone','sf-hotel'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   clearManualForm();

@@ -122,23 +122,23 @@
 
           <!-- Supplementary fields -->
           <div class="supp-fields no-print">
-            <div class="supp-label">Detalles adicionales para los mensajes</div>
+            <div class="supp-label">🔧 Correcciones de recogida · cambiar si la detección fue incorrecta</div>
             <div class="supp-grid">
 
               <div class="supp-field full-width">
-                <label for="sf-hotel">🏨 Hotel</label>
+                <label for="sf-hotel">🏨 Hotel (seleccionar para cambiar horario automáticamente)</label>
                 <select id="sf-hotel" onchange="onHotelChange(this.value)">
                   <option value="">-- Sin hotel / pickup propio --</option>
                 </select>
               </div>
 
               <div class="supp-field">
-                <label for="sf-tour">🏷 Nombre corto del tour</label>
-                <input id="sf-tour" type="text" placeholder="ej. ISLA SAONA" oninput="refreshMessages()">
+                <label for="sf-time">🕐 Hora de recogida</label>
+                <input id="sf-time" type="text" placeholder="Vacío = usar horario del hotel" oninput="refreshAll()">
               </div>
               <div class="supp-field">
                 <label for="sf-meeting">📍 Meeting Point</label>
-                <input id="sf-meeting" type="text" placeholder="ej. LOBBY" oninput="refreshMessages()">
+                <input id="sf-meeting" type="text" placeholder="ej. LOBBY" oninput="refreshAll()">
               </div>
               <div class="supp-field">
                 <label for="sf-area">📍 Área / Zona</label>
@@ -147,6 +147,10 @@
               <div class="supp-field">
                 <label for="sf-phone">📞 Teléfono del cliente</label>
                 <input id="sf-phone" type="text" placeholder="+1 809 XXX XXXX" oninput="refreshMessages()">
+              </div>
+              <div class="supp-field full-width">
+                <label for="sf-tour">🏷 Nombre corto del tour</label>
+                <input id="sf-tour" type="text" placeholder="ej. ISLA SAONA" oninput="refreshMessages()">
               </div>
 
             </div>
