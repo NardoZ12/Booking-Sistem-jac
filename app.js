@@ -248,7 +248,7 @@ function parseGYG(raw) {
   if (prodIdx !== -1 && lines[prodIdx + 1]) {
     product = lines[prodIdx + 1];
   } else {
-    const optIdx = lines.findIndex(l => l.startsWith('Option:'));
+    const optIdx = lines.findIndex(l => /^Opci[oó]n:|^Option:/i.test(l));
     if (optIdx > 0) product = lines[optIdx - 1];
     else if (lines[0] && !/^Booking:/i.test(lines[0])) product = lines[0];
   }
@@ -256,9 +256,13 @@ function parseGYG(raw) {
   let tourDate = '';
   const dateM = text.match(/(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+\w+\s+\d+\w*,?\s+\d{4}/i);
   if (dateM) tourDate = dateM[0];
+  else {
+    const dateEsM = text.match(/(?:(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo),\s+)?\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/i);
+    if (dateEsM) tourDate = dateEsM[0];
+  }
 
   let leadTraveler = '';
-  const leadIdx = lines.findIndex(l => l === 'Lead traveler');
+  const leadIdx = lines.findIndex(l => l === 'Lead traveler' || l === 'Viajero principal');
   if (leadIdx !== -1) leadTraveler = (lines[leadIdx + 1] || '').replace(/\s*\(.*?\)\s*/g, '').trim();
 
   let phone = '';
@@ -272,17 +276,18 @@ function parseGYG(raw) {
     const n = parseInt(totalM[1]);
     numTravelers = `${n} ${n === 1 ? 'persona' : 'personas'}`;
   } else {
-    // Fallback: "2 Adults" or "2x Adult"
-    const adultM = text.match(/(\d+)(?:x)?\s*Adults?/i);
+    // Fallback: "2 Adults", "2x Adult" or "2 Adultos"
+    const adultM = text.match(/(\d+)\s*x?\s*(?:Adults?|Adultos?)/i);
     if (adultM) { const n = parseInt(adultM[1]); numTravelers = `${n} ${n === 1 ? 'persona' : 'personas'}`; }
   }
 
   let location = '';
-  const locIdx = lines.findIndex(l => l === 'Location');
+  const locIdx = lines.findIndex(l => l === 'Location' || l === 'Detalles de la recogida');
   if (locIdx !== -1) {
     for (let i = locIdx + 1; i < lines.length; i++) {
       const l = lines[i];
-      if (l.startsWith('Good ') || l.startsWith('Edit ') || l.startsWith('Open ') || l === 'Pickup details') continue;
+      if (l.startsWith('Good ') || l.startsWith('Edit ') || l.startsWith('Open ') || l === 'Pickup details' ||
+          /^(Editar|Abrir|Ubicaci[oó]n)/i.test(l)) continue;
       location = l; break;
     }
   }
@@ -290,10 +295,18 @@ function parseGYG(raw) {
   let pickupTime = '';
   const pickupM = text.match(/Pickup at\s+(\d+:\d+\s*[AP]M)/i);
   if (pickupM) pickupTime = pickupM[1];
+  else {
+    const pickupEsM = text.match(/Recogida a las\s+(\d{1,2}):(\d{2})/i);
+    if (pickupEsM) pickupTime = to12Hour(pickupEsM[1], pickupEsM[2]);
+  }
 
   let amount = '';
   const amtM = text.match(/\$(\d+\.\d{2})/);
   if (amtM) amount = '$' + amtM[1] + ' USD';
+  else {
+    const amtEsM = text.match(/(\d+),(\d{2})\s*US\$/);
+    if (amtEsM) amount = '$' + amtEsM[1] + '.' + amtEsM[2] + ' USD';
+  }
 
   return { platform: 'GetYourGuide', platformColor: 'gyg',
            bookingCode, product, tourDate, leadTraveler, phone,
@@ -367,15 +380,28 @@ function extractNum(str) {
   return m ? parseInt(m[0]) : 0;
 }
 
+// Convert 24h "HH:MM" to "H:MM AM/PM"
+function to12Hour(hh, mm) {
+  let h = parseInt(hh, 10);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${mm} ${ampm}`;
+}
+
 function shortDate(dateStr) {
   if (!dateStr) return '';
   const enM = ['january','february','march','april','may','june',
                'july','august','september','october','november','december'];
+  const esLongM = ['enero','febrero','marzo','abril','mayo','junio',
+                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
   const esM = ['ene','feb','mar','abr','may','jun',
                'jul','ago','sep','oct','nov','dic'];
 
   const en = dateStr.match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)[,.]?\s+(\w+)\s+(\d+)\w*[,.]?\s+(\d{4})/i);
   if (en) { const mi = enM.indexOf(en[2].toLowerCase()); if (mi !== -1) return `${en[3]}/${mi+1}/${en[4].slice(-2)}`; }
+
+  const esLong = dateStr.match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/i);
+  if (esLong) { const mi = esLongM.indexOf(esLong[2].toLowerCase()); if (mi !== -1) return `${esLong[1]}/${mi+1}/${esLong[3].slice(-2)}`; }
 
   const es = dateStr.match(/(\d{1,2})\s+(\w{3})\w*\s+(\d{4})/);
   if (es) { const mi = esM.indexOf(es[2].toLowerCase()); if (mi !== -1) return `${es[1]}/${mi+1}/${es[3].slice(-2)}`; }
