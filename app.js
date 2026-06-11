@@ -441,6 +441,7 @@ function generateDriverMsg(data, s) {
   const tourName   = (s.tourShort || data.product || 'TOUR').toUpperCase();
   const date       = shortDate(data.tourDate) || '—';
   const time       = effectiveTime(data);
+  const hotel      = _hotelMatch ? _hotelMatch.name : (data.location || data.hotelPickup || '—');
   const meeting    = s.meetingPoint || (_hotelMatch ? _hotelMatch.meetingPoint : '—');
   const area       = s.area || (_hotelMatch ? _hotelMatch.zone : '—');
   const phone      = s.phone || data.phone || '—';
@@ -450,6 +451,8 @@ function generateDriverMsg(data, s) {
 
   return [
     `${tourName} – ${date}`,
+    '',
+    `🏨 Hotel: ${hotel}`,
     '',
     `📍 Meeting point : ${meeting}`,
     '',
