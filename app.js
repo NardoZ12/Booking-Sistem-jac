@@ -93,7 +93,12 @@ function initHotelSelects() {
   populateHotelSelect('mf-hotel');
 }
 
-window.addEventListener('load', initHotelSelects);
+window.addEventListener('load', () => {
+  initHotelSelects();
+  renderClock();
+  setInterval(renderClock, 1000);
+  renderOverview();
+});
 
 // ── Hotel matching ────────────────────────────
 
@@ -641,6 +646,8 @@ function parseBooking() {
   document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-ticket').classList.remove('hidden');
   document.querySelector('.tab').classList.add('active');
+
+  saveToHistory();
 }
 
 function generateManualBooking() {
@@ -690,6 +697,8 @@ function generateManualBooking() {
   document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-ticket').classList.remove('hidden');
   document.querySelector('.tab').classList.add('active');
+
+  saveToHistory();
 }
 
 function clearAll() {
@@ -710,6 +719,240 @@ function clearAll() {
   document.querySelectorAll('.mode-tab').forEach(el => el.classList.remove('active'));
   document.querySelector('.mode-tab').classList.add('active');
   hideHotelBanner();
+}
+
+// ── Navigation (sidebar pages) ─────────────────
+
+function switchSection(name, btn, placeholderTitle) {
+  document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + name).classList.remove('hidden');
+  if (btn) btn.classList.add('active');
+
+  if (name === 'overview')  renderOverview();
+  if (name === 'historial') renderHistorial();
+  if (name === 'placeholder') {
+    document.getElementById('placeholder-title').textContent = placeholderTitle || 'Sección';
+  }
+}
+
+// ── History store (localStorage) ───────────────
+
+const HISTORY_KEY = 'jac_booking_history';
+const HISTORY_MAX = 200;
+
+function getHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+
+function setHistory(list) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); } catch (e) {}
+}
+
+function saveToHistory() {
+  if (!_bookingData) return;
+  const supp = getSupp();
+  supp.time = (document.getElementById('sf-time')?.value || '').trim();
+
+  const entry = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    createdAt: new Date().toISOString(),
+    data: _bookingData,
+    hotelMatch: _hotelMatch,
+    supp
+  };
+
+  const list = getHistory();
+  list.unshift(entry);
+  if (list.length > HISTORY_MAX) list.length = HISTORY_MAX;
+  setHistory(list);
+
+  renderOverview();
+  if (!document.getElementById('page-historial').classList.contains('hidden')) renderHistorial();
+}
+
+function deleteHistoryEntry(id) {
+  setHistory(getHistory().filter(e => e.id !== id));
+  renderHistorial(document.getElementById('historial-search')?.value || '');
+  renderOverview();
+}
+
+function clearHistoryPrompt() {
+  if (!confirm('¿Eliminar todo el historial de reservas? Esta acción no se puede deshacer.')) return;
+  setHistory([]);
+  renderHistorial();
+  renderOverview();
+  showToast('✓ Historial eliminado');
+}
+
+function loadHistoryEntry(id) {
+  const entry = getHistory().find(e => e.id === id);
+  if (!entry) return;
+
+  _bookingData = entry.data;
+  _hotelMatch  = entry.hotelMatch;
+
+  switchSection('reservas', document.querySelector('[data-page="reservas"]'));
+
+  const supp = entry.supp || {};
+  document.getElementById('sf-phone').value   = supp.phone        || '';
+  document.getElementById('sf-tour').value    = supp.tourShort    || '';
+  document.getElementById('sf-meeting').value = supp.meetingPoint || '';
+  document.getElementById('sf-area').value    = supp.area         || '';
+  document.getElementById('sf-time').value    = supp.time         || '';
+  document.getElementById('sf-hotel').value   = (_hotelMatch && typeof _hotelMatch.idx !== 'undefined') ? _hotelMatch.idx : '';
+
+  hideHotelBanner();
+  if (_hotelMatch) showHotelBanner(_hotelMatch);
+
+  renderTicket(_bookingData);
+  refreshMessages();
+
+  document.getElementById('ticket-placeholder').classList.add('hidden');
+  document.getElementById('output-container').classList.remove('hidden');
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-ticket').classList.remove('hidden');
+  document.querySelector('.tab').classList.add('active');
+
+  showToast('✓ Reserva cargada desde el historial');
+}
+
+// ── Overview / stats ───────────────────────────
+
+function platformBadge(platform) {
+  const p = (platform || '').toLowerCase();
+  const cls = p.includes('getyourguide') || p === 'gyg' ? 'gyg'
+            : p.includes('viator')                       ? 'viator'
+            : 'unknown';
+  return `<span class="detected ${cls}">${escHtml(platform || '—')}</span>`;
+}
+
+function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
+
+function renderOverview() {
+  const list = getHistory();
+  const now  = new Date();
+  const today0 = startOfDay(now);
+  const weekAgo = new Date(today0); weekAgo.setDate(weekAgo.getDate() - 6);
+
+  const todayCount = list.filter(e => startOfDay(e.createdAt).getTime() === today0.getTime()).length;
+  const weekCount  = list.filter(e => new Date(e.createdAt) >= weekAgo).length;
+  const totalCount = list.length;
+
+  const counts = { gyg: 0, viator: 0, manual: 0 };
+  list.forEach(e => {
+    const p = (e.data?.platform || '').toLowerCase();
+    if (p.includes('getyourguide') || p === 'gyg') counts.gyg++;
+    else if (p.includes('viator')) counts.viator++;
+    else counts.manual++;
+  });
+
+  document.getElementById('stat-today').textContent = todayCount;
+  document.getElementById('stat-today-sub').textContent = todayCount > 0 ? `${todayCount} generadas hoy` : 'Sin reservas hoy';
+  document.getElementById('stat-week').textContent = weekCount;
+  document.getElementById('stat-week-sub').textContent = `Últimos 7 días`;
+  document.getElementById('stat-total').textContent = totalCount;
+  document.getElementById('stat-total-sub').textContent = totalCount > 0 ? 'Desde que empezaste a usar el sistema' : 'Aún no hay reservas';
+  document.getElementById('stat-platform').textContent = `${counts.gyg}/${counts.viator}/${counts.manual}`;
+
+  document.getElementById('overview-updated').textContent = `Actualizado: ${now.toLocaleString('es-DO')}`;
+
+  const body = document.getElementById('overview-recent-body');
+  const empty = document.getElementById('overview-recent-empty');
+  const recent = list.slice(0, 5);
+  if (recent.length === 0) {
+    body.innerHTML = '';
+    empty.classList.remove('hidden');
+  } else {
+    empty.classList.add('hidden');
+    body.innerHTML = recent.map(e => `
+      <tr>
+        <td>${platformBadge(e.data?.platform)}</td>
+        <td class="ht-name">${escHtml(e.data?.leadTraveler || '—')}</td>
+        <td>${escHtml(e.supp?.tourShort || e.data?.product || '—')}</td>
+        <td>${escHtml(shortDate(e.data?.tourDate) || e.data?.tourDate || '—')}</td>
+        <td>${new Date(e.createdAt).toLocaleString('es-DO')}</td>
+      </tr>`).join('');
+  }
+
+  renderActivity(list);
+}
+
+function renderActivity(list) {
+  const wrap  = document.getElementById('activity-list');
+  const empty = document.getElementById('activity-empty');
+  if (!wrap) return;
+  const items = (list || getHistory()).slice(0, 6);
+  if (items.length === 0) {
+    wrap.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  wrap.innerHTML = items.map(e => `
+    <div class="activity-item">
+      <div class="ai-name">${escHtml(e.data?.leadTraveler || '—')} · ${escHtml(e.supp?.tourShort || e.data?.product || 'Tour')}</div>
+      <div class="ai-meta">${platformBadge(e.data?.platform)} ${new Date(e.createdAt).toLocaleString('es-DO')}</div>
+    </div>`).join('');
+}
+
+// ── Historial page ──────────────────────────────
+
+function renderHistorial(filter) {
+  const list = getHistory();
+  const q = (filter || document.getElementById('historial-search')?.value || '').trim().toLowerCase();
+
+  const filtered = q
+    ? list.filter(e => {
+        const traveler = (e.data?.leadTraveler || '').toLowerCase();
+        const tour     = (e.supp?.tourShort || e.data?.product || '').toLowerCase();
+        return traveler.includes(q) || tour.includes(q);
+      })
+    : list;
+
+  document.getElementById('historial-count').textContent = `${list.length} reserva${list.length === 1 ? '' : 's'} guardada${list.length === 1 ? '' : 's'}`;
+
+  const body  = document.getElementById('historial-body');
+  const empty = document.getElementById('historial-empty');
+
+  if (filtered.length === 0) {
+    body.innerHTML = '';
+    empty.classList.remove('hidden');
+    empty.textContent = q ? 'No se encontraron reservas que coincidan con la búsqueda.' : 'No hay reservas en el historial todavía.';
+    return;
+  }
+  empty.classList.add('hidden');
+
+  body.innerHTML = filtered.map(e => `
+    <tr>
+      <td>${platformBadge(e.data?.platform)}</td>
+      <td class="ht-name">${escHtml(e.data?.leadTraveler || '—')}</td>
+      <td>${escHtml(e.supp?.tourShort || e.data?.product || '—')}</td>
+      <td>${escHtml(shortDate(e.data?.tourDate) || e.data?.tourDate || '—')}</td>
+      <td>${escHtml((e.hotelMatch && e.hotelMatch.name) || e.data?.hotelPickup || '—')}</td>
+      <td>${new Date(e.createdAt).toLocaleString('es-DO')}</td>
+      <td class="history-actions">
+        <button class="ht-btn" onclick="loadHistoryEntry('${e.id}')">Ver</button>
+        <button class="ht-btn danger" onclick="deleteHistoryEntry('${e.id}')">Eliminar</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ── Clock widget (right panel) ─────────────────
+
+function renderClock() {
+  const dayEl  = document.getElementById('clock-day');
+  const timeEl = document.getElementById('clock-time');
+  if (!dayEl || !timeEl) return;
+
+  const now = new Date();
+  const tz = 'America/Santo_Domingo';
+  dayEl.textContent  = new Intl.DateTimeFormat('es-DO', { weekday: 'long', day: 'numeric', month: 'long', timeZone: tz }).format(now);
+  timeEl.textContent = new Intl.DateTimeFormat('es-DO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: tz }).format(now);
 }
 
 // ── Copy / Print ──────────────────────────────
