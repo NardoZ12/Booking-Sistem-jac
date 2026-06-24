@@ -565,7 +565,7 @@ function renderTicket(key, data) {
     <div class="ticket-card ${data.platformColor}">
       <div class="ticket-bar"></div>
       <div class="ticket-brandbar">
-        <img class="ticket-logo-img" src="assets/logo-j.a.c.png" alt="JAC" onerror="this.style.display='none'">
+        <img class="ticket-logo-img" src="assets/jac-logo.png" alt="JAC" onerror="this.style.display='none'">
       </div>
       <div class="ticket-white">
         ${data.product ? `<h2 class="ticket-title">${escHtml(data.product)}</h2>` : ''}
