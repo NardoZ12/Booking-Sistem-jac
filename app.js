@@ -467,7 +467,6 @@ function generateDriverMsg(key, data, s) {
   const time       = effectiveTime(key, data);
   const hotel      = hotelMatch ? hotelMatch.name : (data.location || data.hotelPickup || '—');
   const meeting    = s.meetingPoint || (hotelMatch ? hotelMatch.meetingPoint : '—');
-  const area       = s.area || (hotelMatch ? hotelMatch.zone : '—');
   const phone      = s.phone || data.phone || '—';
   const name       = data.leadTraveler || '—';
   const n          = extractNum(data.numTravelers);
@@ -481,8 +480,6 @@ function generateDriverMsg(key, data, s) {
     `📍 Meeting point : ${meeting}`,
     '',
     `🕖 Pick-up time: ${time}`,
-    '',
-    `📍 Area:  ${area}`,
     '',
     `👤 Client: ${name} (${people})`,
     '',
