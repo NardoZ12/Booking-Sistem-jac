@@ -22,6 +22,10 @@
   --accent-dim: rgba(47,107,255,.15);
   --up:         #22c55e;
   --down:       #ef4444;
+  /* Ticket card (printed/portrait) */
+  --ticket-navy:  #101b30;
+  --ticket-ink:   #16213a;
+  --ticket-label: #9aa0ad;
   --sh:         0 4px 6px -1px rgba(0,0,0,.35), 0 2px 4px -1px rgba(0,0,0,.25);
   --sh-lg:      0 10px 15px -3px rgba(0,0,0,.45), 0 4px 6px -2px rgba(0,0,0,.3);
 }
@@ -571,98 +575,103 @@ body {
   background: var(--bg);
 }
 
-/* ── Ticket card ── */
-.ticket-card { margin: 0; }
-
-.ticket-header {
-  padding: 1.25rem 1.5rem;
-  color: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.ticket-card.gyg    .ticket-header { background: linear-gradient(135deg, var(--gyg), var(--gyg-dk)); }
-.ticket-card.viator .ticket-header { background: linear-gradient(135deg, var(--viator), var(--viator-dk)); }
-.ticket-card.manual .ticket-header { background: linear-gradient(135deg, var(--surface-2) 0%, #000 100%); }
-
-.ticket-brand-text { font-size: 1rem; font-weight: 800; letter-spacing: 0.08em; display: block; }
-.ticket-brand-sub  { font-size: 0.64rem; opacity: 0.85; display: block; margin-top: 0.15rem; }
-
-.ticket-body { padding: 1.1rem 1.5rem 0.85rem; background: var(--surface); }
-
-.ticket-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem 1.25rem;
-  margin-bottom: 0.75rem;
-}
-.ticket-field { margin-bottom: 0.75rem; }
-.field-label {
-  font-size: 0.6rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-faint);
-  margin-bottom: 0.2rem;
-}
-.field-value { font-size: 0.85rem; font-weight: 600; color: var(--text); word-break: break-word; line-height: 1.4; }
-.field-value.highlight { font-size: 1rem; font-weight: 800; color: var(--accent); }
-
-.ticket-divider { height: 1px; background: var(--border); margin: 0.75rem 0; }
-
-/* Hotel badge inside ticket */
-.ticket-hotel-badge {
-  margin: 0.5rem 0 0.75rem;
-  padding: 0.6rem 0.85rem;
-  background: var(--surface-2);
-  border-radius: 8px;
-  color: #fff;
-  border-left: 3px solid var(--accent);
-}
-.thb-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.3rem;
-}
-.thb-icon { font-size: 0.9rem; }
-.thb-name { font-size: 0.8rem; font-weight: 700; flex: 1; }
-.thb-zone {
-  font-size: 0.6rem;
-  background: rgba(255,255,255,.1);
-  padding: 0.15rem 0.5rem;
-  border-radius: 20px;
-  letter-spacing: 0.04em;
-}
-.thb-details {
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  display: flex;
-  gap: 1rem;
-  padding-left: 1.4rem;
+/* ── Ticket card (vertical/portrait) ── */
+.ticket-card {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  background: var(--ticket-navy);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--sh-lg);
 }
 
-.ticket-product {
-  margin-top: 0.5rem;
-  padding: 0.6rem 0.85rem;
-  background: var(--bg);
-  border-radius: 6px;
-  font-size: 0.72rem;
-  color: var(--text-dim);
+.ticket-bar { height: 7px; background: var(--jac-red); }
+
+.ticket-brandbar { padding: 1.6rem 0 1.3rem; text-align: center; }
+.ticket-logo {
+  font-size: 2rem;
+  font-weight: 800;
   font-style: italic;
-  border-left: 3px solid var(--border);
-  line-height: 1.4;
-}
-
-.ticket-footer {
-  padding: 0.65rem 1.5rem;
-  background: var(--surface-2);
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
+  letter-spacing: -0.02em;
+  color: #fff;
+  display: inline-flex;
   align-items: center;
 }
-.ticket-generated, .ticket-date { font-size: 0.6rem; color: var(--text-faint); }
+.tl-drop {
+  width: 0.6em;
+  height: 0.8em;
+  margin: 0 0.05em;
+  background: var(--jac-red);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(45deg);
+  display: inline-block;
+  position: relative;
+}
+.tl-drop::after {
+  content: '';
+  position: absolute;
+  inset: 26%;
+  background: var(--ticket-navy);
+  border-radius: 50%;
+}
+
+.ticket-white {
+  background: #fff;
+  border-radius: 18px;
+  margin: 0 1.1rem 1.1rem;
+  padding: 1.6rem 1.35rem 1.5rem;
+}
+
+.ticket-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  color: var(--ticket-ink);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin-bottom: 1.1rem;
+}
+
+.t-row { margin-bottom: 1rem; }
+.t-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; margin-bottom: 1rem; }
+.t-label {
+  font-size: 0.64rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ticket-label);
+  border-bottom: 1px solid #e7e8ec;
+  padding-bottom: 0.2rem;
+  margin-bottom: 0.35rem;
+}
+.t-value {
+  font-size: 0.92rem;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  color: var(--ticket-ink);
+  word-break: break-word;
+}
+
+.t-divider { height: 1px; background: #d7d9de; margin: 0.4rem 0 0.9rem; }
+.t-total-label {
+  text-align: center;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ticket-label);
+  margin-bottom: 0.4rem;
+}
+.t-total-value {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-style: italic;
+  color: var(--jac-red);
+}
 
 /* ── Message tabs ── */
 .msg-header {
@@ -731,11 +740,11 @@ body {
   .layout { display: block; }
   .output-panel { box-shadow: none; border-radius: 0; position: static; }
   .panel { border: none; }
-  #output-container { display: block !important; }
-  #tab-ticket { display: block !important; }
-  #tab-driver, #tab-client { display: none !important; }
-  .ticket-body, .ticket-footer { background: #fff !important; }
-  .field-label, .field-value, .ticket-generated, .ticket-date { color: #000 !important; }
-  .ticket-hotel-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .ticket-header       { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  [id$="-output-container"] { display: block !important; }
+  [id$="-tab-ticket"] { display: block !important; }
+  [id$="-tab-driver"], [id$="-tab-client"] { display: none !important; }
+  .ticket-card, .ticket-bar, .ticket-brandbar, .tl-drop {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }

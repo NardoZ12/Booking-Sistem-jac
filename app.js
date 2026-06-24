@@ -315,9 +315,11 @@ function parseGYG(raw) {
     if (amtEsM) amount = '$' + amtEsM[1] + '.' + amtEsM[2] + ' USD';
   }
 
+  const { adultCount, childCount } = extractPeopleBreakdown(text);
+
   return { platform: 'GetYourGuide', platformColor: 'gyg',
            bookingCode, product, tourDate, leadTraveler, phone,
-           numTravelers, location, pickupTime, amount,
+           numTravelers, adultCount, childCount, location, pickupTime, amount,
            hotelPickup: '', providerCode: '' };
 }
 
@@ -369,12 +371,24 @@ function parseViator(raw) {
   const provM = text.match(/Número de confirmación del proveedor:\s*(.+)/i);
   if (provM) providerCode = provM[1].trim();
 
+  const { adultCount, childCount } = extractPeopleBreakdown(text);
+
   return { platform: 'Viator', platformColor: 'viator',
            bookingCode, product, tourDate, leadTraveler, phone,
-           numTravelers, location, hotelPickup, pickupTime, amount, providerCode };
+           numTravelers, adultCount, childCount, location, hotelPickup, pickupTime, amount, providerCode };
 }
 
 // ── Helpers ───────────────────────────────────
+
+// "2 Adults" / "2x Adult" / "2 Adultos" and "1 Child" / "1 Niño" / "1 Menor" — null when absent
+function extractPeopleBreakdown(text) {
+  let adultCount = null, childCount = null;
+  const aM = text.match(/(\d+)\s*x?\s*(?:Adults?|Adultos?)\b/i);
+  if (aM) adultCount = parseInt(aM[1]);
+  const cM = text.match(/(\d+)\s*x?\s*(?:Child(?:ren)?|Ni[nñ]os?|Menores?)\b/i);
+  if (cM) childCount = parseInt(cM[1]);
+  return { adultCount, childCount };
+}
 
 function firstName(fullName) {
   if (!fullName) return '';
@@ -516,65 +530,57 @@ function refreshMessages(key) {
 
 // ── Ticket renderer ───────────────────────────
 
-function field(label, value, highlight = false) {
+function ticketRow(label, value) {
   if (!value) return '';
-  return `<div class="ticket-field">
-    <div class="field-label">${label}</div>
-    <div class="field-value${highlight ? ' highlight' : ''}">${escHtml(value)}</div>
+  return `<div class="t-row">
+    <div class="t-label">${escHtml(label)}</div>
+    <div class="t-value">${escHtml(value)}</div>
+  </div>`;
+}
+
+function ticketRow2(labelA, valueA, labelB, valueB) {
+  if (!valueA && !valueB) return '';
+  return `<div class="t-row2">
+    <div class="t-col">
+      <div class="t-label">${escHtml(labelA)}</div>
+      <div class="t-value">${valueA ? escHtml(valueA) : '—'}</div>
+    </div>
+    <div class="t-col">
+      <div class="t-label">${escHtml(labelB)}</div>
+      <div class="t-value">${valueB ? escHtml(valueB) : '—'}</div>
+    </div>
   </div>`;
 }
 
 function renderTicket(key, data) {
-  const now = new Date().toLocaleString('es-DO', {
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
-
   const hotel   = _state[key].hotelMatch;
   const pTime   = effectiveTime(key, data);
-  const meeting = hotel ? hotel.meetingPoint : (document.getElementById(`${key}-sf-meeting`)?.value || data.location || '');
+  const meeting = hotel ? hotel.meetingPoint : (document.getElementById(`${key}-sf-meeting`)?.value || data.location || data.hotelPickup || '');
 
-  const hotelBlock = hotel ? `
-    <div class="ticket-hotel-badge">
-      <div class="thb-row">
-        <span class="thb-icon">🏨</span>
-        <span class="thb-name">${escHtml(hotel.name)}</span>
-        <span class="thb-zone">${escHtml(hotel.zone)}</span>
-      </div>
-      <div class="thb-details">
-        <span>🕐 ${hotel.time}</span>
-        <span>📍 ${hotel.meetingPoint}</span>
-      </div>
-    </div>` : '';
+  const peopleBlock = (data.adultCount != null || data.childCount != null)
+    ? ticketRow2('Adult', `${data.adultCount ?? 0} people`, 'Child', `${data.childCount ?? 0} people`)
+    : ticketRow('Persons', data.numTravelers);
 
   document.getElementById(`${key}-ticket`).innerHTML = `
     <div class="ticket-card ${data.platformColor}">
-      <div class="ticket-header">
-        <div>
-          <span class="ticket-brand-text">JAC TOURS</span>
-          <span class="ticket-brand-sub">Ticket de Confirmación</span>
-        </div>
+      <div class="ticket-bar"></div>
+      <div class="ticket-brandbar">
+        <span class="ticket-logo"><span class="tl-j">J</span><span class="tl-drop"></span><span class="tl-c">C</span></span>
       </div>
-
-      <div class="ticket-body">
-        <div class="ticket-grid">
-          ${field('👤 Viajero Principal', data.leadTraveler)}
-          ${field('👥 Personas',          data.numTravelers)}
-          ${field('📅 Fecha',             data.tourDate)}
-          ${field('🕐 Hora de Recogida',  pTime)}
-        </div>
-        ${field('📍 Lugar de Recogida', meeting || data.location)}
-        ${field('📞 Teléfono',          data.phone)}
-        ${hotelBlock}
-        <div class="ticket-divider"></div>
-        ${field('💰 Monto Pagado', data.amount, true)}
-        ${data.product ? `<div class="ticket-product">🎟 ${escHtml(data.product)}</div>` : ''}
+      <div class="ticket-white">
+        ${data.product ? `<h2 class="ticket-title">${escHtml(data.product)}</h2>` : ''}
+        ${ticketRow('Name', data.leadTraveler)}
+        ${ticketRow2('Date', shortDate(data.tourDate) || data.tourDate, 'Time', pTime)}
+        ${hotel ? ticketRow('Hotel', hotel.name) : ''}
+        ${ticketRow('Pick up point', meeting)}
+        ${peopleBlock}
+        ${data.phone ? ticketRow('Phone', data.phone) : ''}
+        ${data.amount ? `
+        <div class="t-divider"></div>
+        <div class="t-total-label">Total</div>
+        <div class="t-total-value">${escHtml(data.amount)}</div>` : ''}
       </div>
-
-      <div class="ticket-footer">
-        <span class="ticket-generated">JAC Tour and Transfers</span>
-        <span class="ticket-date">Procesado: ${now}</span>
-      </div>
+      <div class="ticket-bar"></div>
     </div>`;
 }
 
