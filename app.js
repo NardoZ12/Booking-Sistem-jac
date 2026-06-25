@@ -260,12 +260,24 @@ function parseGYG(raw) {
     else if (lines[0] && !/^Booking:/i.test(lines[0])) product = lines[0];
   }
 
+  // Strip the purchase date first — "Booked on" is often followed by the date on
+  // its own line ("Wednesday, June 24th, 2026"), which would otherwise be picked
+  // up as the tour date since it also uses a weekday name.
+  const textNoBookedOn = text.replace(
+    /Booked on\s*[\r\n]*\s*(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+\w+\s+\d+\w*,?\s+\d{4}/i, ''
+  );
+
   let tourDate = '';
-  const dateM = text.match(/(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+\w+\s+\d+\w*,?\s+\d{4}/i);
+  const dateM = textNoBookedOn.match(/(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+\w+\s+\d+\w*,?\s+\d{4}/i);
   if (dateM) tourDate = dateM[0];
   else {
-    const dateEsM = text.match(/(?:(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo),\s+)?\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/i);
+    const dateEsM = textNoBookedOn.match(/(?:(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo),\s+)?\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/i);
     if (dateEsM) tourDate = dateEsM[0];
+    else {
+      // Activity date as shown in the page header, e.g. "Jun 25, 2026" (no weekday)
+      const dateAbbrM = textNoBookedOn.match(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}\b/);
+      if (dateAbbrM) tourDate = dateAbbrM[0];
+    }
   }
 
   let leadTraveler = '';
